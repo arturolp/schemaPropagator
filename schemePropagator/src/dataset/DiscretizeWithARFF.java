@@ -6,10 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
-import tools.Tools;
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -189,11 +186,11 @@ public class DiscretizeWithARFF {
 					else{
 						String value = dataRaw.instance(i).stringValue(j);
 
-						System.out.print("("+i+", "+j+"): ");
-						System.out.print(dataScheme.attribute(dataRaw.attribute(j).name()));
+						//System.out.print("("+i+", "+j+"): ");
+						//System.out.print(dataScheme.attribute(dataRaw.attribute(j).name()));
 						//System.out.print(", "+value+", "+containsValue(value, dataScheme.attribute(dataRaw.attribute(j).name())));
 						int index = dataScheme.attribute(dataRaw.attribute(j).name()).indexOfValue(value);
-						System.out.println(", "+value+", "+ index);
+						//System.out.println(", "+value+", "+ index);
 						if(index > -1){
 							inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), value);
 						}
@@ -219,7 +216,7 @@ public class DiscretizeWithARFF {
 
 	}
 
-	private boolean containsValue(String value, Attribute attribute) {
+/*	private boolean containsValue(String value, Attribute attribute) {
 		Boolean c = false;
 		for(int k = 0; k < attribute.numValues(); k++){
 			//System.out.println("<<"+attribute.value(k));
@@ -230,7 +227,7 @@ public class DiscretizeWithARFF {
 		
 		System.out.println(value + " in "+attribute.toString() + " == "+c);
 		return c;
-	}
+	}*/
 
 	public void runner(String inputSchemeFile, String inputRawFile, String outputPath, String outputName) {
 		this.fileInputScheme = inputSchemeFile;
