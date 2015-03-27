@@ -133,11 +133,17 @@ public class DiscretizeWithARFF {
 		String rep = line.replace("'","");
 		rep = rep.replace("\\","");
 		rep = rep.replace("]","");
+		rep = rep.replace("(","");
 		String[] bits = rep.split("-");
 		String lastOne = bits[bits.length-1];
-
+		
+		if(bits.length == 4){
+			lastOne = "-"+lastOne;
+		}
+		
 		c=Double.parseDouble(lastOne);
-
+		
+		//System.out.println(rep+" >> "+c+" >> "+bits.length);
 		return c;
 	}
 
@@ -145,8 +151,11 @@ public class DiscretizeWithARFF {
 	private int getDiscreteValue(double value, int index){
 
 		int disc = 0;
+		
+		
 
 		for(int i = 0; i < attCutoffs.get(index).length; i++){
+			//System.out.println(attCutoffs.get(index)[i]);
 			if(value < attCutoffs.get(index)[i]){
 				break;
 			}
@@ -175,12 +184,13 @@ public class DiscretizeWithARFF {
 
 				if(attLabels.contains(dataRaw.attribute(j).name())){
 
+					//System.out.println(dataRaw.attribute(j).name() + " "+ dataRaw.attribute(j).isNumeric());
 					if(dataRaw.attribute(j).isNumeric()){
 
 						// Set instance's values for the attributes
 						int index = dataScheme.attribute(dataRaw.attribute(j).name()).index();
 						int valueIndex = getDiscreteValue(dataRaw.instance(i).value(j), index);
-						//System.out.println(dataScheme.attribute(dataRaw.attribute(j).name()) + ">"+attBins.get(index)[valueIndex]);
+						//System.out.println(dataScheme.attribute(dataRaw.attribute(j).name()).name() + "[" + dataRaw.instance(i).value(j) + "]:"+valueIndex+ "-> "+attBins.get(index)[valueIndex]);
 						inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), attBins.get(index)[valueIndex]);
 					}
 					else{
