@@ -6,8 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import tools.Tools;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -44,19 +46,20 @@ public class DiscretizeWithARFF {
 				//Labels
 				attLabels.add(dataScheme.attribute(i).name());
 
-
 				//Cutoffs
 				String[] cutString = new String[dataScheme.attribute(i).numValues()];
 				Double[] cutDouble = new Double[dataScheme.attribute(i).numValues()-1];
+
 				for(int j=0; j < dataScheme.attribute(i).numValues(); j++){
 					cutString[j] = dataScheme.attribute(i).value(j);
 					if(j < dataScheme.attribute(i).numValues()-1){
-						cutDouble[j] = getCutoff(cutString[j]);
+						if(hasCutoff(cutString[j])){
+							cutDouble[j] = getCutoff(cutString[j]);
+						}
 					}
 				}
 				attCutoffs.add(cutDouble);
 				attBins.add(cutString);
-
 			}
 
 		} catch (IOException e) {
@@ -107,6 +110,25 @@ public class DiscretizeWithARFF {
 	}
 
 
+	private Boolean hasCutoff(String line){
+		Boolean c=false;
+		String rep = line.replace("'","");
+		rep = rep.replace("\\","");
+		rep = rep.replace("]","");
+		String[] bits = rep.split("-");
+		String lastOne = bits[bits.length-1];
+
+		try{
+			Double.parseDouble(lastOne);
+			c = true;
+		}
+		catch(NumberFormatException nfe){
+			c = false;
+		}
+
+
+		return c;
+	}
 
 
 	private Double getCutoff(String line){
@@ -156,11 +178,26 @@ public class DiscretizeWithARFF {
 
 				if(attLabels.contains(dataRaw.attribute(j).name())){
 
-					// Set instance's values for the attributes
-					int index = dataScheme.attribute(dataRaw.attribute(j).name()).index();
-					int valueIndex = getDiscreteValue(dataRaw.instance(i).value(j), index);
-					//System.out.println(dataScheme.attribute(dataRaw.attribute(j).name()) + ">"+attBins.get(index)[valueIndex]);
-					inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), attBins.get(index)[valueIndex]);
+					if(dataRaw.attribute(j).isNumeric()){
+
+						// Set instance's values for the attributes
+						int index = dataScheme.attribute(dataRaw.attribute(j).name()).index();
+						int valueIndex = getDiscreteValue(dataRaw.instance(i).value(j), index);
+						//System.out.println(dataScheme.attribute(dataRaw.attribute(j).name()) + ">"+attBins.get(index)[valueIndex]);
+						inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), attBins.get(index)[valueIndex]);
+					}
+					else{
+						String value = dataRaw.instance(i).stringValue(j);
+
+						System.out.print("("+i+", "+j+"): ");
+						System.out.print(dataScheme.attribute(dataRaw.attribute(j).name()));
+						//System.out.print(", "+value+", "+containsValue(value, dataScheme.attribute(dataRaw.attribute(j).name())));
+						int index = dataScheme.attribute(dataRaw.attribute(j).name()).indexOfValue(value);
+						System.out.println(", "+value+", "+ index);
+						if(index > -1){
+							inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), value);
+						}
+					}
 				}
 			}
 
@@ -182,6 +219,18 @@ public class DiscretizeWithARFF {
 
 	}
 
+	private boolean containsValue(String value, Attribute attribute) {
+		Boolean c = false;
+		for(int k = 0; k < attribute.numValues(); k++){
+			//System.out.println("<<"+attribute.value(k));
+			if(attribute.value(k) == value){
+				c = true;
+			}
+		}
+		
+		System.out.println(value + " in "+attribute.toString() + " == "+c);
+		return c;
+	}
 
 	public void runner(String inputSchemeFile, String inputRawFile, String outputPath, String outputName) {
 		this.fileInputScheme = inputSchemeFile;

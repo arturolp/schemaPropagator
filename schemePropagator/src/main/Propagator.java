@@ -6,7 +6,7 @@ import dataset.DiscretizeWithNAM;
 
 /**
  *
- * @author Arturo Lopez Pineda
+ * @author arturolp
  * 
  * email: arl68@pitt.edu
  * 
