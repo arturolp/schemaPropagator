@@ -15,8 +15,8 @@ import dataset.DiscretizeWithNAM;
 public class Propagator {
 
 	public static void showInfo(){
-		System.out.println("Expected commands format: -inputScheme data.nam -inputRaw data.arff -outputName newName.arff [-output Desktop/data/]");
-		System.out.println("   -inputScheme data.nam \t data.arff or data.nam is the input file in NAM or ARFF format of the discretization scheme");
+		System.out.println("Expected commands format: -inputSchema data.nam -inputRaw data.arff -outputName newName.arff [-output Desktop/data/]");
+		System.out.println("   -inputSchema data.nam \t data.arff or data.nam is the input file in NAM or ARFF format of the discretization scheme");
 		System.out.println("   -inputRaw data.arff \t the file to be discretized");
 		System.out.println("   -outputName newName.arff \t The new name of the output. The extension can be ARFF or CAS. Default is ARFF");
 		System.out.println("   -output Desktop/results/ \t The output Path where the new CAS or ARFF is going to be created. Default is the same as inputRawFile");
@@ -38,7 +38,7 @@ public class Propagator {
 		String outputName = "";
 
 		for(int i = 0; i < args.length; i++){
-			if(args[i].equalsIgnoreCase("-inputScheme")){
+			if(args[i].equalsIgnoreCase("-inputSchema")){
 				inputSchemeFile = args[(1+i)];
 				inputSchemeType = Util.getFileExtension(inputSchemeFile);
 			}
