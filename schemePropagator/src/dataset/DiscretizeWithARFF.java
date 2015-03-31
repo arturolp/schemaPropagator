@@ -189,9 +189,12 @@ public class DiscretizeWithARFF {
 
 						// Set instance's values for the attributes
 						int index = dataScheme.attribute(dataRaw.attribute(j).name()).index();
-						int valueIndex = getDiscreteValue(dataRaw.instance(i).value(j), index);
-						//System.out.println(dataScheme.attribute(dataRaw.attribute(j).name()).name() + "[" + dataRaw.instance(i).value(j) + "]:"+valueIndex+ "-> "+attBins.get(index)[valueIndex]);
-						inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), attBins.get(index)[valueIndex]);
+						//System.out.println(dataRaw.instance(i).value(j) + " ==? " + Double.isNaN(dataRaw.instance(i).value(j)));
+						if(!Double.isNaN(dataRaw.instance(i).value(j))){
+							int valueIndex = getDiscreteValue(dataRaw.instance(i).value(j), index);
+							System.out.println(dataScheme.attribute(dataRaw.attribute(j).name()).name() + "[" + dataRaw.instance(i).value(j) + "]:"+valueIndex+ "-> "+attBins.get(index)[valueIndex]);
+							inst.setValue(dataScheme.attribute(dataRaw.attribute(j).name()), attBins.get(index)[valueIndex]);
+						}
 					}
 					else{
 						String value = dataRaw.instance(i).stringValue(j);
