@@ -242,10 +242,9 @@ public class DiscretizeWithARFF {
 		return c;
 	}*/
 
-	public void runner(String inputSchemeFile, String inputRawFile, String outputPath, String outputName) {
+	public void runner(String inputSchemeFile, String inputRawFile, String outputFile) {
 		this.fileInputScheme = inputSchemeFile;
 		this.fileInputRaw = inputRawFile;
-		String fileARFF = outputPath+"/"+outputName;
 
 
 		readInputScheme();
@@ -254,7 +253,7 @@ public class DiscretizeWithARFF {
 		System.out.println("Transferring ARFF-Scheme to ARFF-Raw file...");
 		removeAndDiscretize();
 
-		this.fileOutput = fileARFF;
+		this.fileOutput = outputFile;
 		writeARFF();
 
 	}

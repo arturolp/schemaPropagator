@@ -15,16 +15,15 @@ import dataset.DiscretizeWithNAM;
 public class Propagator {
 
 	public static void showInfo(){
-		System.out.println("Expected commands format: -inputSchema data.nam -inputRaw data.arff -outputName newName.arff [-output Desktop/data/]");
-		System.out.println("   -inputSchema data.nam \t data.arff or data.nam is the input file in NAM or ARFF format of the discretization scheme");
-		System.out.println("   -inputRaw data.arff \t the file to be discretized");
-		System.out.println("   -outputName newName.arff \t The new name of the output. The extension can be ARFF or CAS. Default is ARFF");
-		System.out.println("   -output Desktop/results/ \t The output Path where the new CAS or ARFF is going to be created. Default is the same as inputRawFile");
+		System.out.println("Expected commands format: -inputSchema data/schema.arff -inputRaw data/mydata.arff -output data/mydata-schema.arff");
+		System.out.println("   -inputSchema data/schema.arff \t data.arff or data.nam is the input file in NAM or ARFF format of the discretization scheme");
+		System.out.println("   -inputRaw data/mydata.arff \t the file to be discretized");
+		System.out.println("   -output data/mydata-schema.arff \t The new name of the output. The extension can be ARFF or CAS. Default is ARFF");
 	}
 
 	public static void main(String args[]) {
 
-		if((args.length != 2) && (args.length != 4) && (args.length != 6) && (args.length != 8) ){
+		if((args.length != 2) && (args.length != 4) && (args.length != 6) ){
 			System.err.println("Incorrect number of arguments.");
 			showInfo();
 			System.exit(1);
@@ -34,8 +33,7 @@ public class Propagator {
 		String inputSchemeFile = "";
 		String inputSchemeType = "";
 		String inputRawFile = "";
-		String outputPath = "";
-		String outputName = "";
+		String outputFile = "";
 
 		for(int i = 0; i < args.length; i++){
 			if(args[i].equalsIgnoreCase("-inputSchema")){
@@ -46,27 +44,19 @@ public class Propagator {
 				inputRawFile = args[(1+i)];
 			}
 			else if(args[i].equalsIgnoreCase("-output")){
-				outputPath = args[++i];
-			}
-			else if(args[i].equalsIgnoreCase("-outputName")){
-				outputName = args[++i];
+				outputFile = args[++i];
 			}
 
 		}
 
-
-		
-		if(outputPath.equals("")){
-			outputPath = Util.fileNameStemAndSuffix(inputRawFile, "/")[0];
-		}
 
 		if(inputSchemeType.equals("nam")){
 			DiscretizeWithNAM prop = new DiscretizeWithNAM();
-			prop.runner(inputSchemeFile, inputRawFile, outputPath, outputName);
+			prop.runner(inputSchemeFile, inputRawFile, outputFile);
 		}
 		else if(inputSchemeType.equals("arff")){
 			DiscretizeWithARFF prop = new DiscretizeWithARFF();
-			prop.runner(inputSchemeFile, inputRawFile, outputPath, outputName);
+			prop.runner(inputSchemeFile, inputRawFile, outputFile);
 		}
 	}
 

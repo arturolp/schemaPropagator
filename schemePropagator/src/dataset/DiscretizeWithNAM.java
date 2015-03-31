@@ -184,10 +184,9 @@ public class DiscretizeWithNAM {
 	}
 
 
-	public void runner(String inputNAM, String inputARFF, String outputPath, String outputName) {
+	public void runner(String inputNAM, String inputARFF, String outputFile) {
 		this.fileInputNAM = inputNAM;
 		this.fileInputARFF = inputARFF;
-		String fileCAS = outputPath+"/"+outputName;
 
 
 		readInputNAM();
@@ -196,7 +195,7 @@ public class DiscretizeWithNAM {
 		System.out.println("Transferring NAM scheme to ARFF file...");
 		removeNotNAMattributes();
 
-		this.fileOutput = fileCAS;
+		this.fileOutput = outputFile;
 		writeCAS();
 
 	}
