@@ -1,0 +1,24 @@
+@relation /home/victor/Readmission/ARFF/LAB/test_2011.arff-weka.filters.unsupervised.attribute.Remove-R6-81
+
+@attribute Lab1 numeric
+@attribute Lab2 numeric
+@attribute Lab3 numeric
+@attribute Lab4 numeric
+@attribute AGE numeric
+@attribute Hgb_FLAG {L,N,H}
+@attribute K_FLAG {L,H,N}
+@attribute DATE {2011, 2012}
+@attribute GENDER {Female,Male}
+@attribute class {N,Y}
+
+@data
+0,-0.053333,0,2.148358,4,L,L,2011,Female,N
+?,?,?,?,0,?,H,2012,Male,N
+?,?,?,?,0,N,?,2011,Female,N
+?,?,?,?,2,?,?,2011,Male,N
+?,0,?,0.160256,0,N,N,2011,Female,Y
+?,?,?,?,0,?,H,2011,Female,N
+?,-0.959821,?,?,14,N,H,2011,Male,N
+?,?,?,?,0,?,N,2011,Male,N
+-0.02,?,0,?,2,L,N,2011,Female,Y
+?,-0.430464,?,5.768343,21,L,?,2011,Female,N
