@@ -6,8 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -20,37 +22,38 @@ public class DiscretizeWithARFF {
 	ArrayList<Double[]> attCutoffs = new ArrayList<Double[]>();
 	ArrayList<String[]> attBins = new ArrayList<String[]>();
 	ArrayList<String> attLabels = new ArrayList<String>();
-	Instances dataScheme;
+	Instances dataSchema;
 	Instances dataRaw;
 	Instances outData;
-	String classColName;
-	String[] classLabels;
+	
+	String classColName = "";
+	List<String> classLabels = new ArrayList<String>();
 
 
-	private void readInputScheme(){
+	private void readInputSchema(){
 
 		//Read File
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(fileInputScheme));
-			dataScheme = new Instances(reader);
+			dataSchema = new Instances(reader);
 			reader.close();
 
 			//Set class
-			dataScheme.setClassIndex(dataScheme.numAttributes()-1);
+			dataSchema.setClassIndex(dataSchema.numAttributes()-1);
 
 
 			//Get Labels and Cutoffs
-			for(int i = 0; i < dataScheme.numAttributes()-1; i++){
+			for(int i = 0; i < dataSchema.numAttributes()-1; i++){
 				//Labels
-				attLabels.add(dataScheme.attribute(i).name());
+				attLabels.add(dataSchema.attribute(i).name());
 
 				//Cutoffs
-				String[] cutString = new String[dataScheme.attribute(i).numValues()];
-				Double[] cutDouble = new Double[dataScheme.attribute(i).numValues()-1];
+				String[] cutString = new String[dataSchema.attribute(i).numValues()];
+				Double[] cutDouble = new Double[dataSchema.attribute(i).numValues()-1];
 
-				for(int j=0; j < dataScheme.attribute(i).numValues(); j++){
-					cutString[j] = dataScheme.attribute(i).value(j);
-					if(j < dataScheme.attribute(i).numValues()-1){
+				for(int j=0; j < dataSchema.attribute(i).numValues(); j++){
+					cutString[j] = dataSchema.attribute(i).value(j);
+					if(j < dataSchema.attribute(i).numValues()-1){
 						if(hasCutoff(cutString[j])){
 							cutDouble[j] = getCutoff(cutString[j]);
 						}
@@ -173,7 +176,7 @@ public class DiscretizeWithARFF {
 	private void removeAndDiscretize(){ 
 
 		//Empty set of instances with the new Scheme
-		outData = new Instances(dataScheme, 0);
+		initializeOutData();
 
 		int smallCount = 0;
 		int largeCount = 0;
@@ -181,6 +184,7 @@ public class DiscretizeWithARFF {
 
 
 		//Select attributes from Raw
+		/*
 		String[] rawAttributes = new String[dataRaw.numAttributes()];
 		for(int i = 0; i < dataRaw.numAttributes(); i++){
 			rawAttributes[i] = dataRaw.attribute(i).name();
@@ -192,60 +196,114 @@ public class DiscretizeWithARFF {
 			rawIndexes[i] = Arrays.asList(rawAttributes).indexOf(attLabels.get(i));
 			System.out.println(attLabels.get(i)+" is in "+ rawIndexes[i]);
 		}
+		*/
 
 
 		//Select only the chosen attributes and discretize
-		for(int i = 0; i < dataRaw.numInstances(); i++){
-		//for(int i = 0; i < 10; i++){
-			// Create empty instance 
-			Instance inst = new Instance(dataScheme.numAttributes());
+		//Select only the chosen attributes and discretize
+				for(int rawInstanceIndex = 0; rawInstanceIndex < dataRaw.numInstances(); rawInstanceIndex++){
+					Instance newInst = new DenseInstance(outData.numAttributes());
 
-			for(int j = 0; j < rawIndexes.length; j++){
-				int rawindex = rawIndexes[j];
-				if(attLabels.contains(dataRaw.attribute(rawindex).name())){
-					//System.out.println(dataRaw.attribute(rawindex).name() + " "+ dataRaw.attribute(rawindex).isNumeric());
-					if(dataRaw.attribute(rawindex).isNumeric()){
+					for(int outAttIndex = 0; outAttIndex < outData.numAttributes(); outAttIndex++){
 
-						// Set instance's values for the attributes
-						int discindex = dataScheme.attribute(dataRaw.attribute(rawindex).name()).index();
-						//System.out.println(dataRaw.instance(i).value(rawindex) + " ==? " + Double.isNaN(dataRaw.instance(i).value(rawindex)));
-						if(!Double.isNaN(dataRaw.instance(i).value(rawindex))){
-							int valueIndex = getDiscreteValue(dataRaw.instance(i).value(rawindex), discindex);
-							//System.out.println(dataRaw.attribute(rawindex).name() + "[" + dataRaw.instance(i).value(rawindex) + "]:"+valueIndex+ "-> "+attBins.get(discindex)[valueIndex]);
-							inst.setValue(dataScheme.attribute(dataRaw.attribute(rawindex).name()), attBins.get(discindex)[valueIndex]);
+						String outDataName = outData.attribute(outAttIndex).name();
+						int rawAttIndex = dataRaw.attribute(outDataName).index();
+						//String rawAttName = dataRaw.attribute(outDataName).name();
+
+
+						//System.out.println(dataRaw.attribute(rawAttIndex).name() + " "+ dataRaw.attribute(rawAttIndex).isNumeric());
+
+						//If it is numeric, then discretize
+						if(dataRaw.attribute(rawAttIndex).isNumeric()){
+
+							// Set instance's values for the attributes
+							//System.out.println(dataRaw.instance(rawInstanceIndex).value(rawAttIndex) + " ==? " + Double.isNaN(dataRaw.instance(rawInstanceIndex).value(rawAttIndex)));
+							if(!Double.isNaN(dataRaw.instance(rawInstanceIndex).value(rawAttIndex))){
+								double rawValue = dataRaw.instance(rawInstanceIndex).value(rawAttIndex);
+								int discBinIndex = getDiscreteValue(rawValue, outAttIndex);
+								String rawDisc = attBins.get(outAttIndex)[discBinIndex];
+								
+								//System.out.println( rawAttName+ "[" + rawValue + "]:"+discBinIndex+ "-> "+ rawDisc);
+								newInst.setValue(outData.attribute(outAttIndex), rawDisc);
+							}
 						}
-					}
-					else{
-						String value = dataRaw.instance(i).stringValue(rawindex);
+						//if it is not numeric, save the value as is. 
+						else{
+							String value = dataRaw.instance(rawInstanceIndex).stringValue(rawAttIndex);
 
-						//System.out.print("("+i+", "+j+"): ");
-						//System.out.print(dataScheme.attribute(dataRaw.attribute(rawindex).name()));
-						//System.out.print(", "+value+", "+containsValue(value, dataScheme.attribute(dataRaw.attribute(rawindex).name())));
-						int index = dataScheme.attribute(dataRaw.attribute(rawindex).name()).indexOfValue(value);
-						//System.out.println(", "+value+", "+ index);
-						if(index > -1){
-							inst.setValue(dataScheme.attribute(dataRaw.attribute(rawindex).name()), value);
+							//System.out.print("("+i+", "+j+"): ");
+							//System.out.print(dataScheme.attribute(dataRaw.attribute(rawindex).name()));
+							//System.out.print(", "+value+", "+containsValue(value, dataScheme.attribute(dataRaw.attribute(rawindex).name())));
+							//int index = dataSchema.get(0).attribute(dataRaw.attribute(rawAttIndex).name()).indexOfValue(value);
+							//System.out.println(", "+value+", "+ index);
+							//if(index > -1){
+								newInst.setValue(outData.attribute(outAttIndex), value);
+								//outData.setValue(dataSchema.get(0).attribute(dataRaw.attribute(rawAttIndex).name()), value);
+							//}
 						}
+
+					}//for ends, looping the attributes
+
+					//add class value
+					//newInst.setValue(outData.attribute(classColName), dataRaw.instance(rawInstanceIndex).value(dataRaw.classAttribute()));
+					//outData.setValue(dataScheme.classAttribute(), dataRaw.instance(rawInstanceIndex).value(dataRaw.classAttribute()));
+
+					outData.add(newInst);
+
+
+
+
+
+					System.out.print(".");
+					smallCount++;
+					largeCount++;
+					if (largeCount == 10){
+						System.out.println("["+((int) smallCount*100/totalInst)+"%]");
+						largeCount = 0;
 					}
-				}
+
+				}//for ends, looping the instances
+				System.out.println("[100%]");
+
+	}
+	
+	private void initializeOutData() {
+		
+		//add variables from first schema
+		ArrayList<Attribute> attValues = new ArrayList<Attribute>();
+		
+		// add common variables
+		for(int j = 0; j < attLabels.size(); j++){
+			//System.out.println(attLabels.get(j));
+			String attributeName = attLabels.get(j);
+			
+			List<String> attributeValues = new ArrayList<String>();
+			for(int k = 0; k < attBins.get(j).length; k++){
+				attributeValues.add(attBins.get(j)[k]);
 			}
-
-			//add class
-			inst.setValue(dataScheme.classAttribute(), dataRaw.instance(i).value(dataRaw.classAttribute()));
-
-			outData.add(inst);
-
-			System.out.print(".");
-			smallCount++;
-			largeCount++;
-			if (largeCount == 10){
-				System.out.println("["+((int) smallCount*100/totalInst)+"%]");
-				largeCount = 0;
-			}
-
+			
+			attValues.add(new Attribute(attributeName, attributeValues));
 		}
-		System.out.println("[100%]");
-
+		
+		//add class variable
+		int classIndexInFirstSchema = dataSchema.numAttributes()-1;
+		//System.out.println("classIndex: "+classIndexInFirstSchema);
+		classColName = dataSchema.attribute(classIndexInFirstSchema).name();
+		for(int h = 0; h < dataSchema.attribute(classIndexInFirstSchema).numValues(); h++){
+			String value = dataSchema.attribute(classIndexInFirstSchema).value(h);
+			System.out.println(h+": "+value);
+			classLabels.add(value);
+		}
+		attValues.add(new Attribute(classColName, classLabels));
+		
+		//initialize outData
+		outData = new Instances("merged",attValues, 0);
+		
+		
+		
+		
+		
+		System.out.println("size of out: "+outData.numAttributes());
 	}
 
 	/*	private boolean containsValue(String value, Attribute attribute) {
@@ -266,7 +324,7 @@ public class DiscretizeWithARFF {
 		this.fileInputRaw = inputRawFile;
 
 
-		readInputScheme();
+		readInputSchema();
 		readInputRaw();
 
 		System.out.println("Transferring ARFF-Scheme to ARFF-Raw file...");
